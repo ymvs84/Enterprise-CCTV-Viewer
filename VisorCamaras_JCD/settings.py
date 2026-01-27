@@ -133,3 +133,17 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ==============================================================================
+#  CONFIGURACIÓN DE LOGIN
+# ==============================================================================
+
+# 1. Dónde está la página de login
+LOGIN_URL = '/accounts/login/'
+
+# 2. A dónde ir tras loguearse (A la raíz: El Dashboard)
+LOGIN_REDIRECT_URL = '/'
+
+# 3. A dónde ir tras cerrar sesión (Volver al login)
+LOGOUT_REDIRECT_URL = '/accounts/login/'
