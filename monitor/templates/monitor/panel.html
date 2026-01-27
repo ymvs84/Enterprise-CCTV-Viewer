@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>JCDecaux - Security Operations Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        /* ESTILO "CONTROL ROOM" PROFESIONAL */
+        body { background-color: #0b0c10; color: #c5c6c7; font-family: 'Segoe UI', Roboto, sans-serif; }
+        .navbar { background: linear-gradient(90deg, #1f2833 0%, #0b0c10 100%); border-bottom: 2px solid #66fcf1; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .brand-text { color: #fff; letter-spacing: 1px; }
+        .brand-accent { color: #66fcf1; font-weight: bold; }
+
+        /* TARJETAS DE CÁMARA */
+        .cam-card {
+            background: #1f2833;
+            border: 1px solid #45a29e;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .cam-header {
+            padding: 8px 12px;
+            background: rgba(31, 40, 51, 0.9);
+            border-bottom: 1px solid #45a29e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+
+        /* VÍDEO Y LOADING */
+        .video-wrapper { position: relative; aspect-ratio: 16/9; background: #000; }
+        video { width: 100%; height: 100%; display: block; object-fit: fill; position: relative; z-index: 2; }
+
+        /* EL SPINNER DE CARGA (El truco visual) */
+        .loader {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 40px; height: 40px; z-index: 1;
+            border: 4px solid rgba(102, 252, 241, 0.3);
+            border-radius: 50%; border-top: 4px solid #66fcf1;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* BADGES Y RELOJ */
+        .badge-live {
+            background-color: #e74c3c; color: white;
+            padding: 3px 8px; border-radius: 2px;
+            font-size: 0.7em; font-weight: 700; letter-spacing: 0.5px;
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+            animation: blink 2s infinite;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        #clock { font-family: 'Consolas', monospace; font-size: 1.4rem; color: #66fcf1; text-shadow: 0 0 5px rgba(102, 252, 241, 0.5); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark mb-4 px-4 py-3">
+  <div class="d-flex align-items-center">
+    <span class="navbar-brand mb-0 h1 brand-text">🏢 JCDecaux <span class="brand-accent">| VISOR UNIFICADO</span></span>
+  </div>
+  <div class="d-flex align-items-center">
+      <span class="me-3 text-muted small">CONEXIÓN SEGURA: ON-PREMISE</span>
+      <div id="clock">00:00:00</div>
+  </div>
+</nav>
+
+<div class="container-fluid px-4">
+    <div class="row">
+        {% for camara in camaras %}
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4">
+            <div class="cam-card">
+                <div class="cam-header">
+                    <span>📹 {{ camara.nombre|truncatechars:28 }}</span>
+                    <span class="badge-live">EN VIVO</span>
+                </div>
+                <div class="video-wrapper">
+                    <div class="loader"></div>
+                    <video id="video_{{ camara.id }}" controls muted autoplay playsinline></video>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center mt-5 text-muted">
+            <h3>⚠️ No hay señales de vídeo activas</h3>
+            <p>Verifique la conexión con el servidor SQL.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // RELOJ DIGITAL
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-ES');
+    }, 1000);
+
+    // CARGA DE VÍDEO HLS
+    function cargarCamara(videoElementId, streamUrl) {
+        var video = document.getElementById(videoElementId);
+
+        // Función para ocultar el loader cuando arranque el vídeo (opcional, el video lo tapa)
+        video.onplaying = function() {
+            // Podríamos ocultar el loader aquí si quisiéramos lógica extra
+            // Pero con z-index el vídeo simplemente lo tapa.
+        };
+
+        if (Hls.isSupported()) {
+            var hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(e => console.log("Autoplay bloqueado: " + e)); });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = streamUrl;
+            video.addEventListener('loadedmetadata', function() { video.play(); });
+        }
+    }
+
+    {% for camara in camaras %}
+        cargarCamara('video_{{ camara.id }}', '{{ camara.url_hls }}');
+    {% endfor %}
+</script>
+
+</body>
+</html>

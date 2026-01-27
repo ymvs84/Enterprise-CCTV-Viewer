@@ -1,0 +1,27 @@
+# --- Archivos de Sistema y Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# --- IDEs (Configuraciones de tu editor) ---
+.idea/
+.vscode/
+*.swp
+
+# --- ARCHIVOS SENSIBLES (¡IMPORTANTE!) ---
+# Ignorar el archivo con las claves reales
+.env
+
+# Ignorar la base de datos local (si se creó alguna por defecto)
+db.sqlite3
+
+# Ignorar configuración de cámaras real (tiene IPs y contraseñas)
+**/mediamtx.yml
+mediamtx.yml
+MediaServer/mediamtx.yml
+
+# Ignorar logs de errores
+*.log
