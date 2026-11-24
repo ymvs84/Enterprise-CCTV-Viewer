@@ -74,23 +74,29 @@ WSGI_APPLICATION = 'VisorCamaras_JCD.wsgi.application'
 
 
 # ==============================================================================
-#  BASE DE DATOS (Conectada al .env)
+#  BASE DE DATOS
 # ==============================================================================
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        # Lee del .env (ej: JCDecaux_Visor)
-        'NAME': os.getenv('DB_NAME', 'JCDecaux_Visor'),
-        # Lee del .env (ej: (localdb)\MSSQLLocalDB)
-        'HOST': os.getenv('DB_SERVER', r'(localdb)\MSSQLLocalDB'),
-        'PORT': '',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'Trusted_Connection=yes',
-        },
+if os.getenv('DB_ENGINE', 'sqlite').lower() == 'mssql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'mssql',
+            'NAME': os.getenv('DB_NAME', 'JCDecaux_Visor'),
+            'HOST': os.getenv('DB_SERVER', r'(localdb)\MSSQLLocalDB'),
+            'PORT': '',
+            'OPTIONS': {
+                'driver': 'ODBC Driver 17 for SQL Server',
+                'extra_params': 'Trusted_Connection=yes',
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # ==============================================================================

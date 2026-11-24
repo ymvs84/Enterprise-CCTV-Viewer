@@ -7,7 +7,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # 1. LIMPIEZA
-        self.stdout.write("🧹 Borrando configuración anterior...")
+        self.stdout.write("Borrando configuracion anterior...")
         Camara.objects.all().delete()
 
         # DIRECCIÓN DEL SERVIDOR MEDIAMTX (Local)
@@ -36,7 +36,7 @@ class Command(BaseCommand):
         ]
 
         # 3. CREACIÓN EN BBDD
-        self.stdout.write("🏗️  Conectando cámaras al sistema...")
+        self.stdout.write("Conectando camaras al sistema...")
 
         for nombre_web, zona, id_mtx in datos_camaras:
             # Construimos la URL final: http://IP:8888/nombre_camara/index.m3u8
@@ -48,6 +48,6 @@ class Command(BaseCommand):
                 url_hls=url_final,
                 activa=True
             )
-            self.stdout.write(self.style.SUCCESS(f'   ✅ Enlazada: {nombre_web} -> {id_mtx}'))
+            self.stdout.write(self.style.SUCCESS(f'   Enlazada: {nombre_web} -> {id_mtx}'))
 
-        self.stdout.write(self.style.SUCCESS('--- SISTEMA EN LÍNEA: CONFIGURACIÓN REAL APLICADA ---'))
+        self.stdout.write(self.style.SUCCESS('--- SISTEMA EN LINEA: CONFIGURACION REAL APLICADA ---'))
